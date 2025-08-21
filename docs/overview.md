@@ -68,9 +68,9 @@ flowchart LR
 
   %% --- SafeID Wallet (your system) ---
   subgraph S1[SafeID Wallet]
-    A[Web dApp (Vite/TS)]
+    A[Web dApp - Vite/TS]
     W[Passport Wrapper (getReputation)]
-    B[Telegram Bot (Aiogram)]
+    B[Telegram Bot - Aiogram]
     BE[(Backend/Webhook - optional)]
   end
 
