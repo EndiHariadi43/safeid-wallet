@@ -48,10 +48,10 @@ sequenceDiagram
   participant F as Feature/Community
 
   U->>A: Connect wallet + link social
-  A->>P: getReputation(address)
+  A->>P: getReputation - address
   P-->>A: score
   A->>U: show score
-  A->>C: requestAccess(score, address)
+  A->>C: requestAccess - score, address
   C-->>A: allow / deny
   A-->>F: grant / block
   F-->>U: access result
