@@ -92,18 +92,18 @@ flowchart LR
   B -->|Link chat| O
 
   %% Reputation fetch
-  A -->|getReputation(address)| P
-  B -->|getReputation(address)| P
+  A -->|getReputation - address| P
+  B -->|getReputation - address| P
   P -->|score| A
   P -->|score| B
   A --> U
 
   %% Access decisions
-  A -->|requestAccess(score, address)| C
-  B -->|requestAccess(score, address)| C
+  A -->|requestAccess - score, address| C
+  B -->|requestAccess - score, address| C
   C -->|grant/block| F
 
-  %% Notifications / roles (off-chain)
+  %% Notifications / roles - off-chain
   B -->|notify / assign role| TGU
 
   %% Optional backend fan-out
