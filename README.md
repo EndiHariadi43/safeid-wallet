@@ -54,12 +54,13 @@ safeid-wallet/
 ---
 
 ## Dev Quickstart
+```bash
 # Frontend (placeholder)
 cd app && npm i && npm run dev
 
 # Bot (placeholder)
 cd bot && pip install -r requirements.txt && python main.py
-
+```
 ---
 
 ## License
