@@ -1,3 +1,5 @@
+![CI](https://github.com/EndiHariadi43/safeid-wallet/actions/workflows/ci.yml/badge.svg)
+
 # SafeID Wallet
 
 Web3 wallet + reputation layer that integrates with **BNB Passport** for
