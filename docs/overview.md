@@ -69,7 +69,7 @@ flowchart LR
   %% --- SafeID Wallet (your system) ---
   subgraph S1[SafeID Wallet]
     A[Web dApp - Vite/TS]
-    W[Passport Wrapper (getReputation)]
+    W[Passport Wrapper - getReputation]
     B[Telegram Bot - Aiogram]
     BE[(Backend/Webhook - optional)]
   end
@@ -83,7 +83,7 @@ flowchart LR
   %% --- On-chain / Destinations ---
   subgraph O1[On-chain / Destinations]
     C[[Gating Smart Contract]]
-    F[Features & Communities (Airdrop, Allowlist, Voting, Private Chat)]
+    F[Features & Communities - Airdrop, Allowlist, Voting, Private Chat]
   end
 
   %% Links (social + identity)
