@@ -6,7 +6,7 @@ Dokumen ini menjelaskan alur kerja utama SafeID Wallet dalam mengintegrasikan re
 
 ## 🖥️ Mermaid Diagram (GitHub Desktop/Browser)
 
-```mermaid
+'''mermaid
 flowchart TD
     U[User] -->|Connect Wallet| A[SafeID Wallet dApp]
     U -->|/score command| B[Telegram Bot]
