@@ -112,3 +112,12 @@ flowchart LR
   BE --> C
   BE --> F
 ```
+### (Opsional) Peta Komponen ↔ Direktori
+| Komponen | Peran | Direktori |
+|---|---|---|
+| Web dApp (Vite/TS) | UI connect wallet, tampilkan skor, kirim request akses | `app/` |
+| Passport Wrapper | Abstraksi pemanggilan BNB Passport API | `passport/` |
+| Telegram Bot (Aiogram) | Perintah `/score`, verifikasi, role/notify | `bot/` |
+| Backend/Webhook (opsional) | Relay, audit log, rate‑limit | *(nanti: `server/` jika dibutuhkan)* |
+| Gating Smart Contract | Keputusan akses on‑chain | *(nanti: `contracts/`)* |
+
