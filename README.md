@@ -22,6 +22,21 @@ Proof-of-Concept (PoC). Milestone 1: login + fetch reputation score + feature ga
 - [ ] Telegram bot: verify address ↔ Telegram user
 - [ ] Demo & docs
 
+## Project Structure
+safeid-wallet/
+├─ app/              # Frontend dApp (Vite + TS)
+├─ bot/              # Telegram bot (Python + Aiogram)
+├─ passport/         # SDK wrapper (stub getReputation)
+├─ .github/workflows # CI pipeline
+├─ .env.example      # Example environment variables
+├─ LICENSE
+└─ README.md
+
+## Links
+- Project Twitter: [@SafeIDWallet](https://x.com/) *(placeholder)*
+- Contact: endi.linux.mint@gmail.com
+- Powered by [BNB Passport](https://bnbchain.org/en/passport)
+
 ## Dev Quickstart
 ```bash
 # Frontend (placeholder)
