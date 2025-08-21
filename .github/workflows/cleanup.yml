@@ -21,4 +21,4 @@ jobs:
           keep_minimum_runs: 10     # tapi sisakan min. 10 run TERBARU per workflow
           # Optional filters:
           # branches: main          # hanya bersihkan runs di branch main
-          # workflows: CI           # atau hanya workflow bernama "CI"
+          workflows: "CI"           # atau hanya workflow bernama "CI"
