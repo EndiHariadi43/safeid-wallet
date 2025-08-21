@@ -1,9 +1,14 @@
 # SafeID Wallet
 
-![CI](https://github.com/EndiHariadi43/safeid-wallet/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/EndiHariadi43/safeid-wallet/actions/workflows/ci.yml/badge.svg)](https://github.com/EndiHariadi43/safeid-wallet/actions/workflows/ci.yml)
 
 Web3 wallet + reputation layer that integrates with **BNB Passport** for
 lightweight identity verification, anti-bot protection, and trusted user interactions.
+
+📖 **Documentation & Architecture**  
+➡️ See [docs/overview.md](docs/overview.md) for the full flow diagram and explanation.
+
+---
 
 ## Status
 Proof-of-Concept (PoC). Milestone 1: login + fetch reputation score + feature gating.
