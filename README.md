@@ -35,6 +35,7 @@ Proof-of-Concept (PoC). Milestone 1: login + fetch reputation score + feature ga
 ---
 
 ## Project Structure
+```bash
 safeid-wallet/ 
 ├─ app/              # Frontend dApp (Vite + TS) 
 ├─ bot/              # Telegram bot (Python + Aiogram) 
@@ -43,7 +44,7 @@ safeid-wallet/
 ├─ .env.example      # Example environment variables 
 ├─ LICENSE 
 └─ README.md
-
+```
 ---
 
 ## Links
