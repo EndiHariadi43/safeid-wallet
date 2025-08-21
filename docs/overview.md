@@ -56,3 +56,59 @@ sequenceDiagram
   A-->>F: grant / block
   F-->>U: access result
 ```
+## SafeID Wallet – Components / System Context
+
+```mermaid
+flowchart LR
+  %% --- Clients ---
+  subgraph C1[Clients]
+    U[User (Wallet + Browser)]
+    TGU[Telegram User]
+  end
+
+  %% --- SafeID Wallet (your system) ---
+  subgraph S1[SafeID Wallet]
+    A[Web dApp (Vite/TS)]
+    W[Passport Wrapper (getReputation)]
+    B[Telegram Bot (Aiogram)]
+    BE[(Backend/Webhook - optional)]
+  end
+
+  %% --- External Services ---
+  subgraph E1[External Services]
+    P[(BNB Passport API)]
+    O[(OAuth: Twitter / Telegram)]
+  end
+
+  %% --- On-chain / Destinations ---
+  subgraph O1[On-chain / Destinations]
+    C[[Gating Smart Contract]]
+    F[Features & Communities (Airdrop, Allowlist, Voting, Private Chat)]
+  end
+
+  %% Links (social + identity)
+  U -->|Connect wallet| A
+  A -->|Link social| O
+  B -->|Link chat| O
+
+  %% Reputation fetch
+  A -->|getReputation(address)| P
+  B -->|getReputation(address)| P
+  P -->|score| A
+  P -->|score| B
+  A --> U
+
+  %% Access decisions
+  A -->|requestAccess(score, address)| C
+  B -->|requestAccess(score, address)| C
+  C -->|grant/block| F
+
+  %% Notifications / roles (off-chain)
+  B -->|notify / assign role| TGU
+
+  %% Optional backend fan-out
+  A --> BE
+  B --> BE
+  BE --> C
+  BE --> F
+```
