@@ -112,7 +112,7 @@ flowchart LR
   BE --> C
   BE --> F
 ```
-### (Opsional) Peta Komponen ↔ Direktori
+### Peta Komponen ↔ Direktori
 | Komponen | Peran | Direktori |
 |---|---|---|
 | Web dApp (Vite/TS) | UI connect wallet, tampilkan skor, kirim request akses | `app/` |
