@@ -47,6 +47,12 @@ safeid-wallet/
 ```
 ---
 
+## Architecture
+
+See the complete architecture at: [docs/overview.md](./docs/overview.md)
+
+---
+
 ## Links
 - Project Twitter: [@SafeIDWallet](https://x.com/) *(placeholder)*
 - Contact: endi.linux.mint@gmail.com
