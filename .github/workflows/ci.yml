@@ -16,11 +16,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'                         # cache node_modules
       - name: Install
         run: npm i
       - name: Smoke check
-        run: npm run -s dev -- --help || true  # pastikan vite tersedia
+        run: npm run -s dev -- --help || true
 
   lint-bot:
     name: Bot syntax check (Python)
@@ -33,13 +32,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: 'pip'                         # cache paket pip
+          cache: 'pip'
       - name: Install deps
-        run: |
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          else
-            echo "No requirements.txt; skipping installs"
-          fi
+        run: pip install -r requirements.txt
       - name: Syntax check
         run: python -m compileall .
