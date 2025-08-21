@@ -37,3 +37,22 @@ flowchart TD
   classDef decision fill:#fff,stroke:#333,stroke-width:1.5,stroke-dasharray:4 2;
   classDef feature fill:#e8f4ff,stroke:#2d7ff9,stroke-width:1.5;
 ```
+## SafeID Wallet – Sequence
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant A as SafeID dApp
+  participant P as BNB Passport API
+  participant C as Gating Contract
+  participant F as Feature/Community
+
+  U->>A: Connect wallet + link social
+  A->>P: getReputation(address)
+  P-->>A: score
+  A->>U: show score
+  A->>C: requestAccess(score, address)
+  C-->>A: allow / deny
+  A-->>F: grant / block
+  F-->>U: access result
+```
