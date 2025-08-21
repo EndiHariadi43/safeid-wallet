@@ -62,7 +62,7 @@ sequenceDiagram
 flowchart LR
   %% --- Clients ---
   subgraph C1[Clients]
-    U[User (Wallet + Browser)]
+    U[User - Wallet + Browser]
     TGU[Telegram User]
   end
 
