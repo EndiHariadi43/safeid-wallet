@@ -10,8 +10,7 @@ flowchart TD
   B[Telegram Bot]:::bot
   P[(BNB Passport API)]:::passport
   G{Score >= Threshold?}:::decision
-  F[|Features / Communities
-  (Airdrop, Allowlist, Voting, Private Chat)|]:::feature
+  F[|Features / Communities (Airdrop, Allowlist, Voting, Private Chat)|]:::feature
 
   %% Flows: dApp path
   U -->|Connect Wallet & Link Social| A
