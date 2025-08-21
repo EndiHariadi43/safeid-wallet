@@ -54,7 +54,6 @@ safeid-wallet/
 ---
 
 ## Dev Quickstart
-```bash
 # Frontend (placeholder)
 cd app && npm i && npm run dev
 
