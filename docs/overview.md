@@ -9,6 +9,7 @@ flowchart TD
   B[Telegram Bot]:::bot
   P[(BNB Passport API)]:::passport
   G{Score >= Threshold?}:::decision
+  C[[Access/Gating Smart Contract]]:::feature
   F[Features / Communities - Airdrop, Allowlist, Voting, Private Chat]:::feature
 
   %% Flows: dApp path
@@ -24,8 +25,9 @@ flowchart TD
   B --> G
 
   %% Gating
-  G -- Yes --> F
-  G -- No  --> U
+  G -- Yes --> C
+  C --> F
+  G -- No: Improve score --> U
 
   %% Styles
   classDef user fill:#f6f9ff,stroke:#5b8def,stroke-width:1.5;
