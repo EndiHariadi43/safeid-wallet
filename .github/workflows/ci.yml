@@ -15,22 +15,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
-          cache-dependency-path: app/package-lock.json
-      - name: Install (skip if no package.json)
-        run: |
-          if [ -f package.json ]; then
-            npm ci || npm i
-          else
-            echo "No package.json, skipping npm install"
-          fi
-      - name: Smoke check (vite present)
-        run: |
-          if [ -f package.json ]; then
-            npm run -s dev -- --help || true
-          else
-            echo "No package.json, skip smoke"
-          fi
+      - name: Install
+        run: npm i
+      - name: Smoke check
+        run: npm run -s dev -- --help || true
 
   lint-bot:
     runs-on: ubuntu-latest
@@ -42,13 +30,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: 'pip'
-      - name: Install deps (if any)
-        run: |
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          else
-            echo "No requirements.txt, skipping"
-          fi
+      - name: Install deps
+        run: pip install -r requirements.txt
       - name: Syntax check
         run: python -m compileall .
