@@ -10,9 +10,8 @@ permissions:
   contents: read
 
 env:
-  RETAIN_DAYS: "1"                       # hapus run yang lebih tua dari N hari
-  KEEP_MIN_RUNS: "3"                     # minimal sisakan N run terbaru per workflow
-  DELETE_CONCLUSIONS: "failure,cancelled,timed_out"  # target status untuk dihapus
+  RETAIN_DAYS: "1"   # hapus run yang lebih tua dari N hari
+  KEEP_MIN_RUNS: "3" # minimal sisakan N run terbaru per workflow
 
 jobs:
   cleanup:
@@ -24,6 +23,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           retain_days: ${{ env.RETAIN_DAYS }}
           keep_minimum_runs: ${{ env.KEEP_MIN_RUNS }}
-          branch: main
-          delete_run_by_conclusion: true
-          conclusion: ${{ env.DELETE_CONCLUSIONS }}
