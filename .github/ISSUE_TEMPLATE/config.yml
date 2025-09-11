@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/EndiHariadi43/safeid-wallet/security/advisories
+    about: Please report security issues privately via GitHub advisories.
