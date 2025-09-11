@@ -35,7 +35,7 @@ jobs:
       # Build JS/TS project so CodeQL sees dependencies
       - name: Setup Node (for JS/TS)
         if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: 'pnpm'
