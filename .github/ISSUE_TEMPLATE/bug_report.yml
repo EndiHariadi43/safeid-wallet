@@ -1,0 +1,55 @@
+name: Bug report
+description: Create a report to help us improve
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: What happened and what did you expect?
+      placeholder: A clear and concise description of the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Provide minimal steps to reproduce
+      placeholder: 1) Go to ... 2) Click ... 3) See error ...
+      render: bash
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Preview/Prod URL (if any)
+      placeholder: https://endihariadi43.github.io/safeid-wallet/
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - webwallet
+        - docs
+        - ci/cd
+        - security
+  - type: input
+    id: version
+    attributes:
+      label: App/Commit version
+      placeholder: e.g., main@abcd123 or v0.1.0
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: Paste console logs or attach screenshots
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues
+          required: true
+        - label: This is not a security vulnerability (if security, use the link above)
+          required: true
