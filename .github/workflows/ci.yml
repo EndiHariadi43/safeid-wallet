@@ -19,36 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      # Setup pnpm
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
-
-      # Deteksi lockfile untuk menentukan mode cache
-      - id: find_lock
-        shell: bash
-        run: |
-          if ls **/pnpm-lock.yaml 1>/dev/null 2>&1; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      # Node + pnpm cache jika lockfile ada
-      - name: Setup Node (with pnpm cache)
-        if: steps.find_lock.outputs.found == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          cache-dependency-path: "**/pnpm-lock.yaml"
-
-      # Fallback tanpa cache
-      - name: Setup Node (no cache)
-        if: steps.find_lock.outputs.found != 'true'
-        uses: actions/setup-node@v4
+          version: 9
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 

@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -40,7 +40,7 @@ jobs:
 
       - name: Setup Node (JS/TS, with pnpm cache)
         if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: pnpm
