@@ -1,4 +1,3 @@
-# .github/workflows/deploy.yml
 name: Deploy Pages
 
 on:
@@ -27,21 +26,34 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # 1) Install pnpm lebih dulu (supaya tersedia untuk step cache setup-node)
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      # 2) Baru setup Node + aktifkan cache untuk pnpm (sekarang pnpm SUDAH ada)
-      - name: Setup Node
-        uses: actions/setup-node@v5
-        with:
-          node-version: ${{ env.NODE_VERSION || 20 }}
-          cache: pnpm
-          cache-dependency-path: webwallet/pnpm-lock.yaml
+      - id: find_lock
+        shell: bash
+        run: |
+          if ls **/pnpm-lock.yaml 1>/dev/null 2>&1; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
 
-      # 3) Install dependencies
+      - name: Setup Node (with pnpm cache)
+        if: steps.find_lock.outputs.found == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Setup Node (no cache)
+        if: steps.find_lock.outputs.found != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: Install deps (root)
         run: pnpm i || true
 
@@ -51,6 +63,7 @@ jobs:
       - name: Build webwallet
         env:
           BASE_PATH: ${{ env.BASE_PATH }}
+          NODE_OPTIONS: --max-old-space-size=4096
         run: pnpm -C webwallet build
 
       - uses: actions/configure-pages@v5
