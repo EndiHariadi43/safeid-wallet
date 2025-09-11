@@ -1,3 +1,4 @@
+# .github/workflows/deploy.yml
 name: Deploy Pages
 
 on:
@@ -26,35 +27,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1) Install pnpm lebih dulu (supaya tersedia untuk step cache setup-node)
+      # Pastikan pnpm terinstall dulu
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      # 2) Baru setup Node + aktifkan cache untuk pnpm (sekarang pnpm SUDAH ada)
+      # Arahkan cache ke lockfile di webwallet/
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: webwallet/pnpm-lock.yaml
+          cache-dependency-path: |
+            webwallet/pnpm-lock.yaml   # ⬅️ penting
 
-      # 3) Install dependencies
       - name: Install deps (root)
         run: pnpm i || true
 
       - name: Install deps (webwallet)
         run: pnpm -C webwallet i --frozen-lockfile
 
-      # 4) Build Vite (BASE_PATH dikirim ke Vite)
       - name: Build webwallet
         env:
           BASE_PATH: ${{ env.BASE_PATH }}
-          NODE_OPTIONS: --max-old-space-size=4096
         run: pnpm -C webwallet build
 
-      # 5) Upload artifact ke Pages
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
