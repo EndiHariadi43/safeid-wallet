@@ -8,7 +8,7 @@ on:
   schedule:
     - cron: '0 3 * * 1'
   workflow_dispatch:
-    
+
 permissions:
   contents: read
   security-events: write
@@ -32,7 +32,6 @@ jobs:
           languages: ${{ matrix.language }}
           queries: security-and-quality
 
-      # ===== JS/TS: siapkan pnpm + Node (dengan cache) =====
       - name: Setup pnpm (JS/TS)
         if: matrix.language == 'javascript-typescript'
         uses: pnpm/action-setup@v4
@@ -56,7 +55,6 @@ jobs:
           pnpm -C webwallet install --frozen-lockfile=false
           pnpm -C webwallet build || true
 
-      # ===== Python: autobuild standar =====
       - name: Autobuild (Python)
         if: matrix.language == 'python'
         uses: github/codeql-action/autobuild@v3
