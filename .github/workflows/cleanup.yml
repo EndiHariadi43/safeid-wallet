@@ -2,21 +2,29 @@ name: Cleanup old workflow runs (Mattraks)
 
 on:
   schedule:
-    - cron: "0 1 * * *"
-  workflow_dispatch:
+    - cron: "0 0 * * *"   # tiap hari 00:00 UTC
+  workflow_dispatch:       # bisa dipicu manual dari tab Actions
 
 permissions:
-  actions: write
+  actions: write           # penting: izin hapus workflow runs
   contents: read
+
+env:
+  # konfigurasi standar — bisa kamu ubah sewaktu-waktu
+  RETAIN_DAYS: "0"         # hapus run yang lebih tua dari X hari (0 = tidak pakai batas usia)
+  KEEP_MIN_PER_WF: "10"    # minimal simpan 10 run terbaru per workflow
+  DELETE_THESE_CONCLUSIONS: "failure,cancelled,timed_out"  # run dengan kesimpulan ini akan dihapus (kecuali masuk 10 terbaru)
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
-      - uses: Mattraks/delete-workflow-runs@v2
+      - name: Delete old workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          retain_days: 0            # hapus semua yang lebih tua dari 0 hari (praktis: nonaktifkan batas usia)
-          keep_minimum_runs: 10     # tapi sisakan min. 10 run per workflow
-          delete_workflow_by_state: "completed"   # hapus hanya run yang statusnya completed (bisa memuat success/failure)
-          # branch: main            # (opsional) limit ke branch main
+          retain_days: 0            # hapus semua yg lebih tua dr 0 hari
+          keep_minimum_runs: 10     # tapi sisakan min. 10 run TERBARU per workflow
+          # Optional filters:
+          # branches: main          # hanya bersihkan runs di branch main
+          workflows: "CI"           # atau hanya workflow bernama "CI"

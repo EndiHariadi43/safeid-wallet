@@ -3,9 +3,9 @@ name: Deploy Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]        # deploy production
   pull_request:
-    branches: [ main ]
+    branches: [ main ]        # preview untuk PR
 
 permissions:
   contents: read
@@ -27,21 +27,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Pastikan pnpm terinstall dulu
+      # 1) Install pnpm lebih dulu (supaya tersedia untuk step cache setup-node)
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      # Arahkan cache ke lockfile di webwallet/
+      # 2) Baru setup Node + aktifkan cache untuk pnpm (sekarang pnpm SUDAH ada)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION || 20 }}
           cache: pnpm
-          cache-dependency-path: |
-            webwallet/pnpm-lock.yaml   # ⬅️ penting
+          cache-dependency-path: webwallet/pnpm-lock.yaml
 
+      # 3) Install dependencies
       - name: Install deps (root)
         run: pnpm i || true
 

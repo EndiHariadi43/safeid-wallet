@@ -1,4 +1,4 @@
-name: "CodeQL"
+name: CodeQL
 
 on:
   push:
@@ -6,7 +6,8 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 3 * * 1'   # setiap Senin 03:00 UTC
+    - cron: '0 3 * * 1'   # tiap Senin 03:00 UTC
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -14,9 +15,7 @@ permissions:
 
 jobs:
   analyze:
-    name: Analyze (JS/TS + Python)
     runs-on: ubuntu-latest
-
     strategy:
       fail-fast: false
       matrix:
@@ -32,25 +31,31 @@ jobs:
           languages: ${{ matrix.language }}
           queries: security-and-quality
 
-      # Build JS/TS project so CodeQL sees dependencies
-      - name: Setup Node (for JS/TS)
+      # ===== JS/TS setup: pnpm + Node (cache) + deps (opsional) =====
+      - name: Setup pnpm (JS/TS)
+        if: matrix.language == 'javascript-typescript'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node (JS/TS, with pnpm cache)
         if: matrix.language == 'javascript-typescript'
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            webwallet/pnpm-lock.yaml
 
-      - name: Enable Corepack (pnpm)
-        if: matrix.language == 'javascript-typescript'
-        run: corepack enable && corepack prepare pnpm@9 --activate
-
-      - name: Install JS deps
+      - name: Install JS/TS deps
         if: matrix.language == 'javascript-typescript'
         run: |
-          pnpm i || true
-          pnpm -C webwallet i || true
+          pnpm install --frozen-lockfile=false || true
+          pnpm -C webwallet install --frozen-lockfile=false || true
           pnpm -C webwallet build || true
 
+      # ===== Python: autobuild standar =====
       - name: Autobuild (Python)
         if: matrix.language == 'python'
         uses: github/codeql-action/autobuild@v3
