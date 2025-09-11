@@ -2,23 +2,91 @@ name: Cleanup old workflow runs
 
 on:
   schedule:
-    - cron: "0 0 * * *"   # tiap hari 00:00 UTC
+    - cron: "0 0 * * *"   # jalan tiap hari 00:00 UTC
   workflow_dispatch:       # bisa dipicu manual dari tab Actions
 
 permissions:
-  actions: write           # penting: izin hapus workflow runs
+  actions: write           # WAJIB: izin untuk hapus workflow runs
   contents: read
+
+env:
+  # konfigurasi standar — bisa kamu ubah sewaktu-waktu
+  RETAIN_DAYS: "0"         # hapus run yang lebih tua dari X hari (0 = tidak pakai batas usia)
+  KEEP_MIN_PER_WF: "10"    # minimal simpan 10 run terbaru per workflow
+  DELETE_THESE_CONCLUSIONS: "failure,cancelled,timed_out"  # run dengan kesimpulan ini akan dihapus (kecuali masuk 10 terbaru)
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
-      - name: Delete old workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
+      - name: Delete old & failed workflow runs (repo-wide)
+        uses: actions/github-script@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          retain_days: 0            # hapus semua yg lebih tua dr 0 hari
-          keep_minimum_runs: 10     # tapi sisakan min. 10 run TERBARU per workflow
-          # Optional filters:
-          # branches: main          # hanya bersihkan runs di branch main
-          workflows: "CI"           # atau hanya workflow bernama "CI"
+          script: |
+            const keepMin = parseInt(process.env.KEEP_MIN_PER_WF || "10", 10);
+            const retainDays = parseInt(process.env.RETAIN_DAYS || "0", 10);
+            const delConclusions = (process.env.DELETE_THESE_CONCLUSIONS || "")
+              .split(",")
+              .map(s => s.trim().toLowerCase())
+              .filter(Boolean);
+
+            const olderThan = (iso) => {
+              if (!retainDays || retainDays <= 0) return false; // tidak filter berdasarkan umur
+              const created = new Date(iso).getTime();
+              const cutoff = Date.now() - retainDays * 24 * 60 * 60 * 1000;
+              return created < cutoff;
+            };
+
+            // Ambil semua runs (paginated) untuk repo ini
+            const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+
+            // Kelompokkan per workflow_id
+            const byWf = new Map();
+            for (const r of runs) {
+              const arr = byWf.get(r.workflow_id) || [];
+              arr.push(r);
+              byWf.set(r.workflow_id, arr);
+            }
+
+            let deleted = 0, kept = 0;
+            for (const [wfId, arr] of byWf) {
+              // urutkan terbaru dulu (run_number besar -> terbaru)
+              arr.sort((a,b) => b.run_number - a.run_number);
+
+              // simpan N terbaru
+              const head = arr.slice(0, keepMin);
+              const rest = arr.slice(keepMin);
+
+              kept += head.length;
+
+              for (const run of rest) {
+                const concl = (run.conclusion || "").toLowerCase();
+
+                // hapus jika (gagal/dibatalkan/timeout) ATAU (lebih tua dari retainDays jika retainDays > 0)
+                const shouldDelete =
+                  delConclusions.includes(concl) ||
+                  olderThan(run.created_at);
+
+                if (shouldDelete) {
+                  try {
+                    await github.rest.actions.deleteWorkflowRun({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      run_id: run.id,
+                    });
+                    deleted++;
+                  } catch (e) {
+                    // tidak bisa hapus run in_progress/queued — abaikan
+                    core.warning(`Skip run #${run.run_number} (${run.id}): ${e.message}`);
+                  }
+                } else {
+                  kept++;
+                }
+              }
+            }
+
+            core.notice(`Cleanup complete. Kept: ${kept}, Deleted: ${deleted}.`);
