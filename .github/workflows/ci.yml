@@ -18,6 +18,7 @@ jobs:
   build_test:
     runs-on: ubuntu-latest
     steps:
+      - run: echo "CI alive"
       - uses: actions/checkout@v4
 
       - name: Setup pnpm
