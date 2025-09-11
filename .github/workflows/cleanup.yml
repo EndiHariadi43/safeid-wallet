@@ -1,8 +1,8 @@
-name: Cleanup old workflow runs (gh api)
+name: Cleanup old workflow runs (Mattraks)
 
 on:
   schedule:
-    - cron: "0 0 * * *"      # tiap hari 00:00 UTC
+    - cron: "0 0 * * *"   # tiap hari 00:00 UTC
   workflow_dispatch:
 
 permissions:
@@ -10,126 +10,20 @@ permissions:
   contents: read
 
 env:
-  BRANCH: main                          # hanya bersihkan run di branch ini
-  RETAIN_DAYS: "1"                      # hanya hapus yg lebih tua dari X hari
-  KEEP_MIN_PER_WF: "3"                  # simpan minimal N run terbaru per workflow
-  DELETE_CONCLUSIONS: "failure,cancelled,timed_out"   # daftar conclusion yg dihapus (csv)
-  # WF_NAMES: "CI,Deploy Pages,CodeQL"  # (opsional) batasi hanya workflow BERNAME ini (csv)
+  RETAIN_DAYS: "1"                       # hapus run yang lebih tua dari N hari
+  KEEP_MIN_RUNS: "3"                     # minimal sisakan N run terbaru per workflow
+  DELETE_CONCLUSIONS: "failure,cancelled,timed_out"  # target status untuk dihapus
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
-      - name: Show plan
-        run: |
-          echo "Branch...............: $BRANCH"
-          echo "Retain days..........: $RETAIN_DAYS"
-          echo "Keep per workflow....: $KEEP_MIN_PER_WF"
-          echo "Delete conclusions...: $DELETE_CONCLUSIONS"
-          if [ -n "${WF_NAMES:-}" ]; then
-            echo "Only workflows.......: $WF_NAMES"
-          fi
-
-      - name: Ensure jq (just in case)
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Delete old runs via gh api
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}    # gh akan otomatis pakai ini
-        shell: bash
-        run: |
-          set -eo pipefail
-
-          repo="${GITHUB_REPOSITORY}"
-          cutoff_epoch=$(date -u -d "${RETAIN_DAYS} days ago" +%s)
-
-          # bikin array conclusions dari CSV
-          mapfile -t conclusions < <(python3 - <<'PY'
-          import os, json
-          vals=[v.strip() for v in os.environ["DELETE_CONCLUSIONS"].split(",") if v.strip()]
-          print("\n".join(vals))
-          PY
-          )
-
-          # (opsional) whitelist nama workflow
-          wf_filter_re=""
-          if [ -n "${WF_NAMES:-}" ]; then
-            # gabung jadi regex sederhana: ^(A|B|C)$
-            wf_regex="^($(echo "$WF_NAMES" | sed 's/,/|/g' | sed 's/[[:space:]]//g'))$"
-            wf_filter_re="$wf_regex"
-          fi
-
-          echo "Fetching workflow runs from $repo (branch=$BRANCH) ..."
-          # Ambil SEMUA run yang status-nya 'completed' (biar ada 'conclusion'), lalu paginate
-          all_runs_json=$(gh api -H "Accept: application/vnd.github+json" \
-            "/repos/$repo/actions/runs?status=completed&branch=$BRANCH&per_page=100" --paginate)
-
-          # Ambil array run saja
-          runs=$(echo "$all_runs_json" | jq -c '.workflow_runs[]')
-
-          # Kelompokkan per workflow_id supaya bisa "keep N terbaru per workflow"
-          # Simpan sementara ke file untuk efisiensi
-          tmp=$(mktemp)
-          echo "$runs" | jq -s 'group_by(.workflow_id)' > "$tmp"
-
-          total_delete=0
-          kept=0
-
-          groups_len=$(jq 'length' "$tmp")
-          echo "Found $(echo "$runs" | wc -l) runs across $groups_len workflows."
-
-          for i in $(seq 0 $((groups_len-1))); do
-            group_json=$(jq -c ".[$i]" "$tmp")
-
-            # jika ada filter nama workflow, cek nama setiap run (semua sama dalam group)
-            wf_name=$(echo "$group_json" | jq -r '.[0].name')
-            if [ -n "$wf_filter_re" ]; then
-              if ! [[ "$wf_name" =~ $wf_filter_re ]]; then
-                # lewati workflow yg tidak dibolehkan
-                continue
-              fi
-            fi
-
-            # sort desc by created_at
-            sorted=$(echo "$group_json" | jq -c 'sort_by(.created_at) | reverse')
-
-            # keep N terbaru
-            keep_n=${KEEP_MIN_PER_WF:-0}
-            if [ "$keep_n" -gt 0 ]; then
-              to_keep=$(echo "$sorted" | jq -c ".[0:$keep_n]")
-              kept=$(( kept + $(echo "$to_keep" | jq 'length') ))
-              # sisanya kandidat
-              candidates=$(echo "$sorted" | jq -c ".[$keep_n:]")
-            else
-              candidates="$sorted"
-            fi
-
-            # filter by conclusion list & older than cutoff
-            # created_at (ISO) -> epoch
-            for row in $(echo "$candidates" | jq -c '.[]'); do
-              conclusion=$(echo "$row" | jq -r '.conclusion // empty')
-              created=$(echo "$row" | jq -r '.created_at')
-              run_id=$(echo "$row" | jq -r '.id')
-
-              # skip jika conclusion tidak ada di daftar
-              match=false
-              for c in "${conclusions[@]}"; do
-                if [ "$conclusion" = "$c" ]; then match=true; break; fi
-              done
-              if [ "$match" = false ]; then
-                continue
-              fi
-
-              # cek umur
-              epoch=$(date -u -d "$created" +%s)
-              if [ "$epoch" -ge "$cutoff_epoch" ]; then
-                continue
-              fi
-
-              echo "Deleting run $run_id | workflow='$wf_name' | conclusion=$conclusion | created_at=$created"
-              gh api -X DELETE "/repos/$repo/actions/runs/$run_id" >/dev/null
-              total_delete=$((total_delete+1))
-            done
-          done
-
-          echo "::notice title=Cleanup summary::Deleted $total_delete run(s). Kept (recent) $kept run(s)."
+      - name: Delete old workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          retain_days: ${{ env.RETAIN_DAYS }}
+          keep_minimum_runs: ${{ env.KEEP_MIN_RUNS }}
+          branch: main
+          delete_run_by_conclusion: true
+          conclusion: ${{ env.DELETE_CONCLUSIONS }}
