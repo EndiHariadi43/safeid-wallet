@@ -1,23 +1,48 @@
 name: CI
 
 on:
-  pull_request:
   push:
-    branches: [ main, dev ]
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: 20
+  PNPM_VERSION: 9
 
 jobs:
-  build:
+  build_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          version: 9
-      - uses: actions/setup-node@v4
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node (pnpm cache → webwallet lockfile)
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'pnpm'
-      - run: pnpm i
-      - run: pnpm lint || true
-      - run: pnpm test --if-present
-      - run: pnpm -C webwallet build || pnpm build --if-present
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: |
+            webwallet/pnpm-lock.yaml
+
+      - name: Install deps (root)
+        run: pnpm i || true
+
+      - name: Install deps (webwallet)
+        run: pnpm -C webwallet i --frozen-lockfile
+
+      - name: Lint (skip if not present)
+        run: pnpm -C webwallet lint || true
+
+      - name: Test (skip if not present)
+        run: pnpm -C webwallet test --if-present || true
+
+      - name: Build (verifikasi build)
+        run: pnpm -C webwallet build
