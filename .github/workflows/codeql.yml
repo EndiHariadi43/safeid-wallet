@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 3 * * 1'
+    - cron: '0 3 * * 1'   # tiap Senin 03:00 UTC
   workflow_dispatch:
 
 permissions:
@@ -22,7 +22,6 @@ jobs:
         language: [ 'javascript-typescript', 'python' ]
 
     steps:
-      - run: echo "CodeQL placeholder"
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -32,6 +31,7 @@ jobs:
           languages: ${{ matrix.language }}
           queries: security-and-quality
 
+      # ===== JS/TS setup: pnpm + Node (cache) + deps (opsional) =====
       - name: Setup pnpm (JS/TS)
         if: matrix.language == 'javascript-typescript'
         uses: pnpm/action-setup@v4
@@ -48,13 +48,14 @@ jobs:
             pnpm-lock.yaml
             webwallet/pnpm-lock.yaml
 
-      - name: Install JS deps
+      - name: Install JS/TS deps
         if: matrix.language == 'javascript-typescript'
         run: |
           pnpm install --frozen-lockfile=false || true
-          pnpm -C webwallet install --frozen-lockfile=false
+          pnpm -C webwallet install --frozen-lockfile=false || true
           pnpm -C webwallet build || true
 
+      # ===== Python: autobuild standar =====
       - name: Autobuild (Python)
         if: matrix.language == 'python'
         uses: github/codeql-action/autobuild@v3
