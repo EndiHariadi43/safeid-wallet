@@ -24,25 +24,41 @@ jobs:
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup Node (pnpm cache → webwallet lockfile)
+      - id: find_lock
+        shell: bash
+        run: |
+          if ls **/pnpm-lock.yaml 1>/dev/null 2>&1; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node (with pnpm cache)
+        if: steps.find_lock.outputs.found == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION || 20 }}
           cache: pnpm
           cache-dependency-path: |
-            webwallet/pnpm-lock.yaml
+            **/pnpm-lock.yaml
+
+      - name: Setup Node (no cache)
+        if: steps.find_lock.outputs.found != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION || 20 }}
 
       - name: Install deps (root)
-        run: pnpm i || true
+        run: pnpm install --frozen-lockfile=false
 
       - name: Install deps (webwallet)
-        run: pnpm -C webwallet i --frozen-lockfile
+        run: pnpm -C webwallet install --frozen-lockfile=false
 
-      - name: Lint (skip if not present)
+      - name: Lint
         run: pnpm -C webwallet lint || true
 
-      - name: Test (skip if not present)
+      - name: Test
         run: pnpm -C webwallet test --if-present || true
 
-      - name: Build (verifikasi build)
+      - name: Build webwallet
         run: pnpm -C webwallet build
