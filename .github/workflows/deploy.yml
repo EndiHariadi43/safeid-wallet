@@ -2,7 +2,9 @@ name: Deploy Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]          # deploy production
+  pull_request:
+    branches: [ main ]          # preview untuk PR
 
 permissions:
   contents: read
@@ -13,30 +15,53 @@ concurrency:
   group: "pages"
   cancel-in-progress: true
 
+env:
+  NODE_VERSION: 20
+  PNPM_VERSION: 9
+  # base path GitHub Pages untuk project: https://<user>.github.io/<repo>/
+  BASE_PATH: /safeid-wallet/
+
 jobs:
   build:
+    name: Build site
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+
+      # Siapkan Node + pnpm (dengan cache)
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          version: 9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-      - run: pnpm i
-      - run: pnpm -C webwallet i
-      - run: pnpm -C webwallet build
+      - name: Enable Corepack (pnpm)
+        run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
+
+      # Install dependensi (root opsional) + webwallet
+      - name: Install deps (root)
+        run: pnpm i --frozen-lockfile || pnpm i
+      - name: Install deps (webwallet)
+        run: pnpm -C webwallet i --frozen-lockfile || pnpm -C webwallet i
+
+      # Build Vite; BASE_PATH diteruskan ke Vite (lihat vite.config.ts)
+      - name: Build webwallet
+        env:
+          BASE_PATH: ${{ env.BASE_PATH }}
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: pnpm -C webwallet build
+
+      # Upload artifact ke Pages
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: webwallet/dist
 
   deploy:
+    name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
     environment:
+      # GitHub otomatis bedakan Production vs Preview untuk PR
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
