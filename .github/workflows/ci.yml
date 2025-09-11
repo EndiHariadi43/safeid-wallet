@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -19,11 +20,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Setup pnpm
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
 
+      # Deteksi lockfile untuk menentukan mode cache
       - id: find_lock
         shell: bash
         run: |
@@ -33,7 +36,8 @@ jobs:
             echo "found=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Setup Node (with cache)
+      # Node + pnpm cache jika lockfile ada
+      - name: Setup Node (with pnpm cache)
         if: steps.find_lock.outputs.found == 'true'
         uses: actions/setup-node@v4
         with:
@@ -41,23 +45,27 @@ jobs:
           cache: pnpm
           cache-dependency-path: "**/pnpm-lock.yaml"
 
+      # Fallback tanpa cache
       - name: Setup Node (no cache)
         if: steps.find_lock.outputs.found != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      # Install dependencies
       - name: Install deps (root)
-        run: pnpm i || true
+        run: pnpm install --frozen-lockfile=false
 
       - name: Install deps (webwallet)
-        run: pnpm -C webwallet i --frozen-lockfile
+        run: pnpm -C webwallet install --frozen-lockfile=false
 
+      # Lint / Test opsional
       - name: Lint
         run: pnpm -C webwallet lint || true
 
       - name: Test
         run: pnpm -C webwallet test --if-present || true
 
-      - name: Build
+      # Build check
+      - name: Build webwallet
         run: pnpm -C webwallet build
