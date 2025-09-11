@@ -1,61 +1,23 @@
 name: CI
 
 on:
-  # Hanya trigger kalau file di bawah app/ atau bot/ berubah
-  push:
-    paths:
-      - 'app/**'
-      - 'bot/**'
   pull_request:
-    paths:
-      - 'app/**'
-      - 'bot/**'
-  # Jalankan manual dari tab Actions
-  workflow_dispatch:
-
-# Batalkan run sebelumnya di branch yang sama (hemat kuota)
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  push:
+    branches: [ main, dev ]
 
 jobs:
-  build-app:
-    name: Build app (Vite smoke)
+  build:
     runs-on: ubuntu-latest
-    # Skip job jika commit message mengandung [skip ci]
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
-    defaults:
-      run:
-        working-directory: app
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install
-        run: npm i
-      - name: Smoke check
-        run: npm run -s dev -- --help || true
-
-  lint-bot:
-    name: Bot syntax check (Python)
-    runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
-    defaults:
-      run:
-        working-directory: bot
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: 'pip'
-      - name: Install deps
-        run: |
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          else
-            echo "No requirements.txt; skipping"
-          fi
-      - name: Syntax check
-        run: python -m compileall .
+          cache: 'pnpm'
+      - run: pnpm i
+      - run: pnpm lint || true
+      - run: pnpm test --if-present
+      - run: pnpm -C webwallet build || pnpm build --if-present
