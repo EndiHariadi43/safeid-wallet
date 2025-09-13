@@ -15,8 +15,6 @@ env:
 jobs:
   build-android:
     runs-on: ubuntu-latest
-
-    # <-- pass secrets ke env job supaya bisa dipakai di if:
     env:
       KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -37,14 +35,18 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: "**/pnpm-lock.yaml"
+          cache-dependency-path: webwallet/pnpm-lock.yaml
 
-      - name: Install deps
+      # (opsional) Pastikan tidak ada workspace pnpm yang nyasar
+      - name: Remove stray workspace files
         run: |
-          pnpm i || true
-          pnpm -C webwallet i --frozen-lockfile
+          rm -f pnpm-workspace.yaml || true
+          rm -f webwallet/pnpm-workspace.yaml || true
 
-      # IMPORTANT: build untuk Android -> JANGAN set BUILD_TARGET=pages
+      - name: Install deps (only webwallet)
+        working-directory: webwallet
+        run: pnpm install --frozen-lockfile=false
+
       - name: Build web (Android target)
         working-directory: webwallet
         run: pnpm build
@@ -59,12 +61,10 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      # Cache Gradle agar build lebih cepat
-      - name: Setup Gradle
+      - name: Setup Gradle cache
         uses: gradle/actions/setup-gradle@v3
 
       # ---------- RELEASE SIGNING (opsional) ----------
-      # Hanya dijalankan bila secret keystore disediakan
       - name: Decode keystore
         if: ${{ env.KEYSTORE_BASE64 != '' }}
         run: |
@@ -82,7 +82,6 @@ jobs:
           } >> gradle.properties
 
       # ---------- Build ----------
-      # Debug APK selalu dibangun
       - name: Build APK (debug)
         working-directory: webwallet/android
         run: ./gradlew assembleDebug
@@ -93,7 +92,6 @@ jobs:
           name: safeid-wallet-debug-apk
           path: webwallet/android/app/build/outputs/apk/debug/app-debug.apk
 
-      # Release APK hanya jika ada keystore
       - name: Build APK (release)
         if: ${{ env.KEYSTORE_BASE64 != '' }}
         working-directory: webwallet/android
