@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 20.19.5
+  NODE_VERSION: 20
   PNPM_VERSION: 9
   BASE_PATH: /safeid-wallet/
 
@@ -24,13 +24,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
+      # pastikan pnpm terpasang dulu
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
+          version: ${{ env.PNPM_VERSION || 9 }}
 
+      # deteksi lockfile (agar setup-node tidak error kalau file tidak ada)
       - id: find_lock
         shell: bash
         run: |
@@ -40,19 +42,22 @@ jobs:
             echo "found=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # setup-node + cache (jika lockfile ada)
       - name: Setup Node (with pnpm cache)
         if: steps.find_lock.outputs.found == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION || 20 }}
           cache: pnpm
-          cache-dependency-path: "**/pnpm-lock.yaml"
+          cache-dependency-path: |
+            **/pnpm-lock.yaml
 
+      # fallback: tanpa cache
       - name: Setup Node (no cache)
         if: steps.find_lock.outputs.found != 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION || 20 }}
 
       - name: Install deps (root)
         run: pnpm i || true
@@ -62,11 +67,13 @@ jobs:
 
       - name: Build webwallet
         env:
-          BASE_PATH: ${{ env.BASE_PATH }}
+          BUILD_TARGET: pages              # ← penting utk GitHub Pages (base: /safeid-wallet/)
+          BASE_PATH: ${{ env.Base_PATH || env.BASE_PATH }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: pnpm -C webwallet build
 
       - uses: actions/configure-pages@v5
+
       - uses: actions/upload-pages-artifact@v4
         with:
           path: webwallet/dist
