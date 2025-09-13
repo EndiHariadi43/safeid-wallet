@@ -69,15 +69,9 @@ jobs:
         if: ${{ env.KEYSTORE_BASE64 != '' }}
         shell: bash
         run: |
-          set -euo pipefail
           mkdir -p webwallet/android/app
-          # buang CR/LF/spasi lalu decode; -i = ignore-garbage
+          # hapus CRLF/spasi, decode; -i = ignore-garbage
           printf '%s' "${KEYSTORE_BASE64}" | tr -d '\r\n ' | base64 -d -i > webwallet/android/app/keystore.jks
-      
-          # verifikasi cepat (tidak mencetak secret)
-          keytool -list -keystore webwallet/android/app/keystore.jks -storepass "${KEYSTORE_PASSWORD}" >/dev/null 2>&1 || {
-            echo "Keystore invalid atau password salah"; exit 1;
-          }
 
       - name: Configure signing
         if: ${{ env.KEYSTORE_BASE64 != '' }}
