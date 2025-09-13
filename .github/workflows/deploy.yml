@@ -59,25 +59,47 @@ jobs:
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v4
-        with:
-          distribution: temurin
-          java-version: "21"
 
       - name: Setup Gradle cache
         uses: gradle/actions/setup-gradle@v3
 
       # ---------- Signing (opsional) ----------
-      - name: Decode keystore
-        if: ${{ env.KEYSTORE_BASE64 != '' }}
+      # 1) Cek apakah secret keystore ada
+      - name: Check keystore secret
+        id: has_keystore
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > webwallet/android/app/keystore.jks
+          if [ -n "${KEYSTORE_BASE64}" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
 
+      # 2) Decode keystore (jalan hanya jika ada secret)
+      - name: Decode keystore
+        if: steps.has_keystore.outputs.present == 'true'
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p webwallet/android/app
+          # bersihkan CR/LF & spasi, lalu decode (ignore-garbage)
+          printf '%s' "${KEYSTORE_BASE64}" | tr -d '\r\n ' | base64 -d -i > webwallet/android/app/keystore.jks
+
+      # 3) Tulis gradle.properties untuk signing
       - name: Configure signing
-        if: ${{ env.KEYSTORE_BASE64 != '' }} # <-- Jika mau strict, ganti KEYSTORE_BASE4 -> KEYSTORE_BASE64
+        if: steps.has_keystore.outputs.present == 'true'
         working-directory: webwallet/android
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
           {
-            echo "MY_KEYSTORE_FILE=keystore.jks"
+            echo "MY_KEYSTORE_FILE=app/keystore.jks"
             echo "MY_KEY_ALIAS=${KEY_ALIAS}"
             echo "MY_KEY_PASSWORD=${KEY_PASSWORD}"
             echo "MY_STORE_PASSWORD=${KEYSTORE_PASSWORD}"
@@ -95,7 +117,7 @@ jobs:
           path: webwallet/android/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Build APK (release)
-        if: ${{ env.KEYSTORE_BASE64 != '' }}
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
         working-directory: webwallet/android
         run: ./gradlew assembleRelease
 

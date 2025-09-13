@@ -11,7 +11,7 @@ permissions:
 env:
   NODE_VERSION: 20.19.5
   PNPM_VERSION: 9
-  # Secrets dibaca ke ENV supaya mudah dipakai di langkah-langkah
+  # Tarik dari Secrets → tersedia sebagai env.* di langkah-langkah
   KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
   KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
   KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -37,7 +37,6 @@ jobs:
           cache: pnpm
           cache-dependency-path: webwallet/pnpm-lock.yaml
 
-      # Bersihkan file workspace PNPM yang bisa memicu "packages field missing or empty"
       - name: Cleanup workspace files
         run: |
           rm -f pnpm-workspace.yaml || true
@@ -47,7 +46,7 @@ jobs:
         working-directory: webwallet
         run: pnpm install --frozen-lockfile=false
 
-      - name: Build web (Android target)
+      - name: Build web
         working-directory: webwallet
         run: pnpm build
 
@@ -55,7 +54,7 @@ jobs:
         working-directory: webwallet
         run: pnpm cap sync android
 
-      # AGP 8.13 → gunakan JDK 21 agar konsisten dengan compileOptions/jvmTarget
+      # AGP 8.13 → gunakan Java 21
       - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
@@ -65,12 +64,15 @@ jobs:
       - name: Setup Gradle cache
         uses: gradle/actions/setup-gradle@v3
 
-      # ---------- Signing (opsional; aktif jika KEYSTORE_BASE64 terisi) ----------
+      # ---------- Signing (opsional, aktif jika KEYSTORE_BASE64 di-setup) ----------
       - name: Decode keystore
         if: ${{ env.KEYSTORE_BASE64 != '' }}
         shell: bash
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > webwallet/android/app/keystore.jks
+          set -euo pipefail
+          mkdir -p webwallet/android/app
+          # Bersihkan CRLF/spasi, lalu decode; -i=ignore-garbage
+          printf '%s' "${KEYSTORE_BASE64}" | tr -d '\r\n ' | base64 -d -i > webwallet/android/app/keystore.jks
 
       - name: Configure signing
         if: ${{ env.KEYSTORE_BASE64 != '' }}
@@ -106,7 +108,7 @@ jobs:
           name: safeid-wallet-release-apk
           path: webwallet/android/app/build/outputs/apk/release/app-release.apk
 
-      # (Opsional) Build AAB untuk Play Store
+      # (Opsional) AAB untuk Play Store
       - name: Build AAB (release)
         if: ${{ env.KEYSTORE_BASE64 != '' }}
         working-directory: webwallet/android
