@@ -50,6 +50,30 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      # Cache Gradle agar build lebih cepat
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      # ---------- RELEASE SIGNING (opsional) ----------
+      # Step-step berikut hanya dijalankan jika secret keystore tersedia.
+      - name: Decode keystore
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > webwallet/android/app/keystore.jks
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
+      - name: Configure signing
+        if: ${{ secrets.KEY_ALIAS != '' && secrets.KEY_PASSWORD != '' && secrets.KEYSTORE_PASSWORD != '' }}
+        run: |
+          {
+            echo "MY_KEYSTORE_FILE=keystore.jks"
+            echo "MY_KEY_ALIAS=${{ secrets.KEY_ALIAS }}"
+            echo "MY_KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}"
+            echo "MY_STORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}"
+          } >> webwallet/android/gradle.properties
+
+      # ---------- BUILD DEBUG ----------
       - name: Build APK (debug)
         working-directory: webwallet/android
         run: ./gradlew assembleDebug
@@ -59,3 +83,16 @@ jobs:
         with:
           name: safeid-wallet-debug-apk
           path: webwallet/android/app/build/outputs/apk/debug/app-debug.apk
+
+      # ---------- BUILD RELEASE (opsional; butuh keystore) ----------
+      - name: Build APK (release)
+        if: ${{ secrets.KEYSTORE_BASE64 != '' && secrets.KEY_ALIAS != '' && secrets.KEY_PASSWORD != '' && secrets.KEYSTORE_PASSWORD != '' }}
+        working-directory: webwallet/android
+        run: ./gradlew assembleRelease
+
+      - name: Upload release APK
+        if: ${{ success() && secrets.KEYSTORE_BASE64 != '' && secrets.KEY_ALIAS != '' && secrets.KEY_PASSWORD != '' && secrets.KEYSTORE_PASSWORD != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: safeid-wallet-release-apk
+          path: webwallet/android/app/build/outputs/apk/release/app-release.apk
