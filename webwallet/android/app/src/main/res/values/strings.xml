@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SafeID Wallet</string>
+    <string name="title_activity_main">SafeID Wallet</string>
+    <string name="package_name">com.endihariadi.safeid</string>
+    <string name="custom_url_scheme">com.endihariadi.safeid</string>
+</resources>
