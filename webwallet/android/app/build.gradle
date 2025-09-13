@@ -1,4 +1,4 @@
-// webwallet/android/app/build.gradle
+//file:noinspection GrDeprecatedAPIUsage
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
@@ -6,38 +6,50 @@ plugins {
 
 android {
     namespace "com.endihariadi.safeid"
-    compileSdk 35
-
+    compileSdkVersion 36
     defaultConfig {
         applicationId "com.endihariadi.safeid"
         minSdk 21
-        targetSdk 35
+        targetSdkVersion 36
         versionCode 1
         versionName "1.0"
     }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "21"
+    }
+    signingConfigs {
+        release {
+            // aman terhadap ketiadaan properti
+            if (project.hasProperty("MY_KEYSTORE_FILE")) {
+                storeFile file(MY_KEYSTORE_FILE)
+                storePassword MY_STORE_PASSWORD
+                keyAlias MY_KEY_ALIAS
+                keyPassword MY_KEY_PASSWORD
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (project.hasProperty("MY_KEYSTORE_FILE")) {
+                signingConfig signingConfigs.release
+            }
+        }
+        debug {
+            // optional: sign debug dengan keystore default Android Studio
+        }
     }
 }
 
 dependencies {
     implementation project(':capacitor-android')
     implementation project(':capacitor-cordova-android-plugins')
-
-    implementation "androidx.core:core-ktx:1.15.0"
-    implementation "androidx.appcompat:appcompat:1.7.0"
-    implementation "com.google.android.material:material:1.12.0"
+    implementation "androidx.core:core-ktx:1.17.0"
+    implementation "androidx.appcompat:appcompat:1.7.1"
+    implementation "com.google.android.material:material:1.13.0"
 }
