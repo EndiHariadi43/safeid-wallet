@@ -67,8 +67,11 @@ jobs:
       # ---------- Signing (opsional) ----------
       - name: Decode keystore
         if: ${{ env.KEYSTORE_BASE64 != '' }}
+        shell: bash
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > webwallet/android/app/keystore.jks
+          mkdir -p webwallet/android/app
+          # hapus CRLF/spasi, decode; -i = ignore-garbage
+          printf '%s' "${KEYSTORE_BASE64}" | tr -d '\r\n ' | base64 -d -i > webwallet/android/app/keystore.jks
 
       - name: Configure signing
         if: ${{ env.KEYSTORE_BASE64 != '' }} # <-- Jika mau strict, ganti KEYSTORE_BASE4 -> KEYSTORE_BASE64
