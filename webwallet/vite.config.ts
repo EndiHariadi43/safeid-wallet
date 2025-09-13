@@ -1,28 +1,21 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-/**
- * BASE PATH
- * - Untuk GitHub Pages (Project Pages), situs berada di subpath: /<repo>/
- * - Kita ambil dari env BASE_PATH (dikirim dari workflow). Default ke '/safeid-wallet/'.
- * - Preview Pages PR juga berada di bawah /safeid-wallet/, jadi aman.
- */
-const base = process.env.BASE_PATH || '/safeid-wallet/'
+// BUILD_TARGET=pages  -> untuk GitHub Pages
+// (tanpa BUILD_TARGET) -> untuk Android/desktop dev
+export default defineConfig(() => {
+  const isPages = process.env.BUILD_TARGET === 'pages'
+  // Jika Anda sudah menyetel BASE_PATH di deploy.yml, pakai itu; fallback ke '/safeid-wallet/'
+  const pagesBase = process.env.BASE_PATH ?? '/safeid-wallet/'
 
-export default defineConfig({
-  plugins: [react()],
-  base,
-  build: {
-    target: 'es2020',
-    sourcemap: true,          // memudahkan debugging
-    chunkSizeWarningLimit: 700,
-    assetsInlineLimit: 0,     // simpan asset sebagai file terpisah (lebih cacheable)
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'ethers']
-        }
-      }
-    }
+  return {
+    plugins: [react()],
+    base: isPages ? pagesBase : '/',      // Android/Local = '/'
+    build: {
+      outDir: 'dist',
+      sourcemap: true,                    // berguna untuk debugging CI/Pages
+    },
+    // Optional: akses dari perangkat lain di jaringan saat dev
+    // server: { host: true, port: 5173 },
   }
 })
