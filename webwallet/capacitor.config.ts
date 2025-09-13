@@ -1,13 +1,9 @@
-import { CapacitorConfig } from '@capacitor/cli';
+import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.safeid.wallet',
+  appId: 'com.endihariadi.safeid',
   appName: 'SafeID Wallet',
-  webDir: 'dist',
-  bundledWebRuntime: false,
-  server: {
-    androidScheme: 'https'
-  }
+  webDir: 'dist'
 };
 
 export default config;
