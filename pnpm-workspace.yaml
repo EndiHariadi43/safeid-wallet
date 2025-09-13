@@ -1,0 +1,4 @@
+packages:
+  - 'webwallet'
+onlyBuiltDependencies:
+  - esbuild
