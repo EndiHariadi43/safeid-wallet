@@ -9,14 +9,14 @@ android {
     compileSdkVersion 36
     defaultConfig {
         applicationId "com.endihariadi.safeid"
-        minSdk 21
+        minSdk 23
         targetSdkVersion 36
         versionCode 1
         versionName "1.0"
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
     kotlinOptions {
         jvmTarget = "21"

@@ -11,15 +11,15 @@ permissions:
 env:
   NODE_VERSION: 20.19.5
   PNPM_VERSION: 9
+  # Secrets dibaca ke ENV supaya mudah dipakai di langkah-langkah
+  KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+  KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+  KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+  KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
 
 jobs:
   build-android:
     runs-on: ubuntu-latest
-    env:
-      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -37,13 +37,13 @@ jobs:
           cache: pnpm
           cache-dependency-path: webwallet/pnpm-lock.yaml
 
-      # (opsional) Pastikan tidak ada workspace pnpm yang nyasar
-      - name: Remove stray workspace files
+      # Bersihkan file workspace PNPM yang bisa memicu "packages field missing or empty"
+      - name: Cleanup workspace files
         run: |
           rm -f pnpm-workspace.yaml || true
           rm -f webwallet/pnpm-workspace.yaml || true
 
-      - name: Install deps (only webwallet)
+      - name: Install deps (webwallet only)
         working-directory: webwallet
         run: pnpm install --frozen-lockfile=false
 
@@ -55,6 +55,7 @@ jobs:
         working-directory: webwallet
         run: pnpm cap sync android
 
+      # AGP 8.13 → gunakan JDK 21 agar konsisten dengan compileOptions/jvmTarget
       - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
@@ -64,18 +65,22 @@ jobs:
       - name: Setup Gradle cache
         uses: gradle/actions/setup-gradle@v3
 
-      # ---------- RELEASE SIGNING (opsional) ----------
+      # ---------- Signing (opsional; aktif jika KEYSTORE_BASE64 terisi) ----------
       - name: Decode keystore
         if: ${{ env.KEYSTORE_BASE64 != '' }}
+        shell: bash
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > webwallet/android/app/keystore.jks
+          set -euo pipefail
+          mkdir -p webwallet/android/app
+          # Hapus CRLF/spasi agar decoding stabil; -i = ignore-garbage
+          printf '%s' "${KEYSTORE_BASE64}" | tr -d '\r\n ' | base64 -d -i > webwallet/android/app/keystore.jks
 
       - name: Configure signing
         if: ${{ env.KEYSTORE_BASE64 != '' }}
         working-directory: webwallet/android
         run: |
           {
-            echo "MY_KEYSTORE_FILE=keystore.jks"
+            echo "MY_KEYSTORE_FILE=app/keystore.jks"
             echo "MY_KEY_ALIAS=${KEY_ALIAS}"
             echo "MY_KEY_PASSWORD=${KEY_PASSWORD}"
             echo "MY_STORE_PASSWORD=${KEYSTORE_PASSWORD}"
@@ -103,3 +108,16 @@ jobs:
         with:
           name: safeid-wallet-release-apk
           path: webwallet/android/app/build/outputs/apk/release/app-release.apk
+
+      # (Opsional) Build AAB untuk Play Store
+      - name: Build AAB (release)
+        if: ${{ env.KEYSTORE_BASE64 != '' }}
+        working-directory: webwallet/android
+        run: ./gradlew bundleRelease
+
+      - name: Upload release AAB
+        if: ${{ env.KEYSTORE_BASE64 != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: safeid-wallet-release-aab
+          path: webwallet/android/app/build/outputs/bundle/release/app-release.aab
