@@ -1,4 +1,4 @@
-name: Android Build (Capacitor)
+name: Deploy Pages
 
 on:
   workflow_dispatch:
