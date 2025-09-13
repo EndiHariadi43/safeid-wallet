@@ -71,7 +71,7 @@ jobs:
           echo "$KEYSTORE_BASE64" | base64 -d > webwallet/android/app/keystore.jks
 
       - name: Configure signing
-        if: ${{ env.KEYSTORE_BASE4 != '' }} # <-- Jika mau strict, ganti KEYSTORE_BASE4 -> KEYSTORE_BASE64
+        if: ${{ env.KEYSTORE_BASE64 != '' }} # <-- Jika mau strict, ganti KEYSTORE_BASE4 -> KEYSTORE_BASE64
         working-directory: webwallet/android
         run: |
           {
