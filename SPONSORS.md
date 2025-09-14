@@ -36,8 +36,20 @@ Want to support **SafeID Wallet**?
 - Recognition across our community channels.  
 - Big impact: you directly fuel the growth of SafeID Wallet and our open-source ecosystem 🌍  
 
-Thank you for helping us grow 🙏
+---
+
+## 🎁 One-time Support Tiers
+
+### ⭐ $10 one-time — Twitter Shoutout
+- A public thank-you shoutout from our official Twitter/X account.  
+- Your support helps us continue building SafeID Wallet and open-source tools.  
+
+### 🌟 $50 one-time — Mention in Release Notes
+- Your name/username will be mentioned in the **Release Notes** of the next SafeID Wallet version.  
+- Recognition for directly contributing to project milestones.  
 
 ---
+
+Thank you for helping us grow 🙏  
 
 <p align="center">Made with ❤️ by <a href="https://github.com/EndiHariadi43">Endi Hariadi</a></p>
