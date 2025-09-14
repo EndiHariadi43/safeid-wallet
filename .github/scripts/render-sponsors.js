@@ -118,10 +118,41 @@ function patchReadmeFeatured(list) {
   fs.writeFileSync("README.md", readme);
 }
 
+function writeIntoMarkers(file, start, end, content) {
+  let text = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+  if (!text.includes(start)) {
+    // fallback: kalau marker belum ada, tulis penuh
+    fs.writeFileSync(file, content);
+    return;
+  }
+  const re = new RegExp(`${start}[\\s\\S]*?${end}`);
+  const block = `${start}\n${content}\n${end}`;
+  text = text.replace(re, block);
+  fs.writeFileSync(file, text);
+}
+
 (async () => {
   const sponsors = await fetchSponsors();
-  fs.writeFileSync("SPONSORS.md", renderSponsorsMd(sponsors));
+  const g = groupByTier(sponsors);
+  const autoBlock = `## 🥇 Gold Sponsors
+${g.Gold.length ? g.Gold.map(s => line(s, 40)).join("\n") : "_—_"}
+
+## 🥈 Silver Sponsors
+${g.Silver.length ? g.Silver.map(s => line(s, 28)).join("\n") : "_—_"}
+
+## 🥉 Bronze Sponsors
+${g.Bronze.length ? g.Bronze.map(s => line(s, 24)).join("\n") : "_—_"}`;
+
+  // Update SPONSORS.md hanya di antara marker
+  writeIntoMarkers(
+    "SPONSORS.md",
+    "<!-- SPONSORS_AUTO_START -->",
+    "<!-- SPONSORS_AUTO_END -->",
+    autoBlock
+  );
+
   ensureReadmeMarkers();
   patchReadmeFeatured(sponsors);
-  console.log("SPONSORS.md & README.md updated.");
+  console.log("SPONSORS.md & README.md updated (with markers).");
 })();
+
