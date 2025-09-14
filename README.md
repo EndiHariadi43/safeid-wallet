@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./docs/assets/safeid-logo.png" alt="SafeID Wallet Logo" width="180"/>
+  <img src="./docs/assets/safeid-logo-circle.png" alt="SafeID Wallet Logo" width="180" style="border-radius:50%;"/>
 </p>
 
 <h1 align="left">SafeID Wallet</h1>
