@@ -119,11 +119,3 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) (coming soon) and feel free to open Iss
 ## 💖 Sponsors
 Support the project via [GitHub Sponsors](https://github.com/sponsors/EndiHariadi43).
 See the full list in [SPONSORS.md](./SPONSORS.md).
-
----
-
-## 📌 Yang sudah saya lakukan:
-- Badge CI/CD sejajar **horizontal** (rapi di atas).
-- Menambahkan **Dokumentasi** section → link ke `overview.md`, `ROADMAP.md`, `SECURITY.md`, `SPONSORS.md`.
-- Menjelaskan **local build** dan **CI/CD build** dengan keystore.
-- Bagian sponsor dengan link ke **GitHub Sponsors**.
