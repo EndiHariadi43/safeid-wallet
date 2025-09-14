@@ -1,0 +1,43 @@
+name: Sponsors (Realtime)
+
+on:
+  repository_dispatch:
+    types: [sponsors_event]   # dipicu oleh Cloudflare Worker
+
+permissions:
+  contents: write             # agar bisa commit perubahan file
+
+jobs:
+  update-sponsors:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm i graphql-request
+
+      - name: Render SPONSORS.md & patch README
+        env:
+          GH_TOKEN: ${{ secrets.GH_SPONSORS_TOKEN }}   # PAT read-only untuk GraphQL
+          GH_LOGIN: "EndiHariadi43"                    # username Anda
+          EVENT_ACTION: ${{ github.event.client_payload.action }}
+          EVENT_TIER: ${{ github.event.client_payload.tierName }}
+          EVENT_SPONSOR: ${{ github.event.client_payload.sponsor }}
+          EVENT_PRIVACY: ${{ github.event.client_payload.privacy || 'PUBLIC' }}
+        run: node .github/scripts/render-sponsors.js
+
+      - name: Commit & push if changed
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add SPONSORS.md README.md
+            git commit -m "chore: realtime sponsors update (${EVENT_ACTION} ${EVENT_TIER} by ${EVENT_SPONSOR})"
+            git push
+          else
+            echo "No changes"
+          fi
