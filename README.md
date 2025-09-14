@@ -2,7 +2,7 @@
   <img src="./docs/assets/safeid-logo.png" alt="SafeID Wallet Logo" width="200"/>
 </p>
 
-<h1 align="center">SafeID Wallet</h1>
+<h1 align="left">SafeID Wallet</h1>
 
 <p align="center">
   <a href="https://github.com/EndiHariadi43/safeid-wallet/actions/workflows/ci.yml">
@@ -31,7 +31,7 @@ SafeID Wallet is a **lightweight, security-first crypto wallet** focused on **BN
 It is currently available as a **Web MVP** and can also be built into an **Android APK** using Capacitor.
 
 <p align="center">
-  <img src="./docs/assets/demo-screenshot.png" alt="Demo Screenshot" width="400">
+  <img src="./docs/assets/demo-screenshot.png" alt="Demo Screenshot">
 </p>
 
 ---
