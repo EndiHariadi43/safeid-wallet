@@ -2,11 +2,11 @@ name: Sponsors (Realtime)
 
 on:
   repository_dispatch:
-    types: [sponsors_event] # dipicu oleh Cloudflare Worker
-  workflow_dispatch: {}
+    types: [sponsors_event]
+  workflow_dispatch: {}  # biar bisa test manual
 
 permissions:
-  contents: write             # agar bisa commit perubahan file
+  contents: write
 
 jobs:
   update-sponsors:
@@ -19,25 +19,43 @@ jobs:
           node-version: 20
 
       - name: Install deps
-        run: npm i graphql-request
+        run: npm i graphql-request twitter-api-v2
 
       - name: Render SPONSORS.md & patch README
         env:
-          GH_TOKEN: ${{ secrets.GH_SPONSORS_TOKEN }}   # PAT read-only untuk GraphQL
-          GH_LOGIN: "EndiHariadi43"                    # username Anda
+          GH_TOKEN: ${{ secrets.GH_SPONSORS_TOKEN }}
+          GH_LOGIN: "EndiHariadi43"
           EVENT_ACTION: ${{ github.event.client_payload.action }}
           EVENT_TIER: ${{ github.event.client_payload.tierName }}
           EVENT_SPONSOR: ${{ github.event.client_payload.sponsor }}
           EVENT_PRIVACY: ${{ github.event.client_payload.privacy || 'PUBLIC' }}
         run: node .github/scripts/render-sponsors.js
 
+      - name: Tweet for $10 one-time
+        if: ${{ github.event.client_payload.isOneTime == true && contains(lower(github.event.client_payload.tierName), '10') || github.event.client_payload.amountCents == 1000 }}
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          EVENT_SPONSOR: ${{ github.event.client_payload.sponsor }}
+          EVENT_PRIVACY: ${{ github.event.client_payload.privacy || 'PUBLIC' }}
+        run: node .github/scripts/post-twitter.js
+
+      - name: Queue Release Notes for $50 one-time
+        if: ${{ github.event.client_payload.isOneTime == true && (contains(lower(github.event.client_payload.tierName), '50') || github.event.client_payload.amountCents == 5000) }}
+        env:
+          EVENT_SPONSOR: ${{ github.event.client_payload.sponsor }}
+          EVENT_PRIVACY: ${{ github.event.client_payload.privacy || 'PUBLIC' }}
+        run: node .github/scripts/append-release-note.js
+
       - name: Commit & push if changed
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add SPONSORS.md README.md
-            git commit -m "chore: realtime sponsors update (${EVENT_ACTION} ${EVENT_TIER} by ${EVENT_SPONSOR})"
+            git add SPONSORS.md README.md RELEASE_NOTES_PENDING.md
+            git commit -m "chore: sponsors realtime update"
             git push
           else
             echo "No changes"
