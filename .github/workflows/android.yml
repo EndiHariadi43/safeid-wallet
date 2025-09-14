@@ -49,6 +49,16 @@ jobs:
         working-directory: webwallet
         run: pnpm cap sync android
 
+      # DEBUG: pastikan file/folder-nya ada
+      - name: Show Capacitor gradle wiring
+        run: |
+          ls -la webwallet/android || true
+          [ -f webwallet/android/capacitor.settings.gradle ] && \
+            { echo "== capacitor.settings.gradle =="; sed -n '1,120p' webwallet/android/capacitor.settings.gradle; } || \
+            echo "capacitior.settings.gradle MISSING"
+          [ -d webwallet/android/capacitor-cordova-android-plugins ] && \
+            echo "cordova-android-plugins present" || echo "cordova-android-plugins MISSING"
+
       # Toolchain: cocok dengan app/build.gradle (Java/Kotlin target 17)
       - name: Setup Java 17
         uses: actions/setup-java@v4

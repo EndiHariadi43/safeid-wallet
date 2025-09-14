@@ -48,7 +48,10 @@ android {
 
 dependencies {
     implementation project(':capacitor-android')
-    implementation project(':capacitor-cordova-android-plugins')
+
+    if (findProject(':capacitor-cordova-android-plugins') != null) {
+        implementation project(':capacitor-cordova-android-plugins')
+    }
 
     implementation "androidx.core:core-ktx:1.17.0"
     implementation "androidx.appcompat:appcompat:1.7.1"
