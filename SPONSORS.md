@@ -16,14 +16,27 @@ _This section is auto-generated. It will list sponsors by tier (Gold / Silver / 
 ## 🙌 Become a Sponsor
 
 Want to support **SafeID Wallet**?  
-👉 [Sponsor this project](https://github.com/EndiHariadi43)
+👉 [Sponsor this project](https://github.com/sponsors/EndiHariadi43)
 
-**Sponsorship tiers:**
-- 🥉 **Bronze Sponsor** — Name listed in README + SPONSORS.md  
-- 🥈 **Silver Sponsor** — Logo + link featured in README + SPONSORS.md  
-- 🥇 **Gold Sponsor** — Featured section in README + logo on project site  
+### 🥉 Bronze Sponsor — $5/month
+- Your **name/username** will be listed in `README.md` and `SPONSORS.md`.  
+- Recognition as a Bronze Sponsor of the SafeID Wallet project.  
+- Small but meaningful support to keep the project open-source 🚀  
 
-Thank you for helping us grow 🚀
+### 🥈 Silver Sponsor — $25/month
+- Your **logo + link** featured in `README.md` and `SPONSORS.md`.  
+- Higher visibility to the SafeID Wallet community.  
+- Recognition as a Silver Sponsor in our ecosystem.  
+- Helps cover server/API/infra costs so we can ship more features ⚡  
+
+### 🥇 Gold Sponsor — $100/month
+- **Featured section** in `README.md` (top placement, with logo + link).  
+- Your **logo displayed on our project site** (if available).  
+- Listed in `SPONSORS.md` as Gold Sponsor with highlighted visibility.  
+- Recognition across our community channels.  
+- Big impact: you directly fuel the growth of SafeID Wallet and our open-source ecosystem 🌍  
+
+Thank you for helping us grow 🙏
 
 ---
 
