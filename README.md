@@ -127,5 +127,3 @@ See the full list in [SPONSORS.md](./SPONSORS.md).
 - Menambahkan **Dokumentasi** section → link ke `overview.md`, `ROADMAP.md`, `SECURITY.md`, `SPONSORS.md`.
 - Menjelaskan **local build** dan **CI/CD build** dengan keystore.
 - Bagian sponsor dengan link ke **GitHub Sponsors**.
-
-Mau saya buatkan juga file `SPONSORS.md` dan `docs/overview.md` langsung siap unduh biar tinggal commit ke repo?
