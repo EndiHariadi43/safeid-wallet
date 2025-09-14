@@ -1,4 +1,8 @@
-# SafeID Wallet
+<p align="center">
+  <img src="./docs/assets/safeid-logo.png" alt="SafeID Wallet Logo" width="200"/>
+</p>
+
+<h1 align="center">SafeID Wallet</h1>
 
 <p align="center">
   <a href="https://github.com/EndiHariadi43/safeid-wallet/actions/workflows/ci.yml">
