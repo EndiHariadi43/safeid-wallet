@@ -64,5 +64,3 @@ jobs:
             git commit -m "chore: sponsors realtime update"
             git push
           fi
-            echo "No changes"
-          fi
