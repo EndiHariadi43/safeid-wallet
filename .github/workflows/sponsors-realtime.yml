@@ -53,12 +53,16 @@ jobs:
 
       - name: Commit & push if changed
         run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add SPONSORS.md README.md RELEASE_NOTES_PENDING.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
             git commit -m "chore: sponsors realtime update"
             git push
-          else
+          fi
             echo "No changes"
           fi
