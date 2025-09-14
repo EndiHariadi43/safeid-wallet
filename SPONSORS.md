@@ -8,7 +8,14 @@ Your contributions help us maintain, improve, and keep this project open-source.
 ## 🌟 Current Sponsors
 
 <!-- SPONSORS_AUTO_START -->
-_This section is auto-generated. It will list sponsors by tier (Gold / Silver / Bronze) once available._
+## 🥇 Gold Sponsors
+_—_
+
+## 🥈 Silver Sponsors
+_—_
+
+## 🥉 Bronze Sponsors
+_—_
 <!-- SPONSORS_AUTO_END -->
 
 ---

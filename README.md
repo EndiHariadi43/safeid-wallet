@@ -123,3 +123,9 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) (coming soon) and feel free to open Iss
 ## 💖 Sponsors
 Support the project via [GitHub Sponsors](https://github.com/sponsors/EndiHariadi43).
 See the full list in [SPONSORS.md](./SPONSORS.md).
+
+
+## 🌟 Featured Sponsor
+<!-- FEATURED_SPONSOR_START -->
+_No featured sponsor yet_
+<!-- FEATURED_SPONSOR_END -->

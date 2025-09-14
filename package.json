@@ -7,34 +7,32 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview --port 5173",
-
     "cap": "cap",
     "cap:add:android": "cap add android",
     "cap:sync": "cap sync",
     "cap:sync:android": "cap sync android",
     "cap:open:android": "cap open android",
-
     "android:debug": "cd android && (./gradlew assembleDebug || .\\gradlew.bat assembleDebug)",
     "android:release": "cd android && (./gradlew assembleRelease || .\\gradlew.bat assembleRelease)"
   },
   "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
     "ethers": "^6.13.2",
+    "graphql-request": "^7.2.0",
     "qrcode": "^1.5.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    
-    "@capacitor/core": "^7.4.3",
-    "@capacitor/android": "^7.4.3"
+    "twitter-api-v2": "^1.27.0"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.4.3",
     "@types/node": "^20.11.30",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.2",
     "typescript": "^5.5.4",
-    "vite": "^5.4.2",
-    
-    "@capacitor/cli": "^7.4.3"
+    "vite": "^5.4.2"
   }
 }
