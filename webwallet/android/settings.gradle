@@ -7,18 +7,15 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
-    // ⚠️ Ubah dari FAIL_ON_PROJECT_REPOS -> PREFER_SETTINGS
-    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS) // <— ini saja
     repositories {
         google()
         mavenCentral()
     }
 }
 
-rootProject.name = "android"
+// Nama root opsional (boleh ada/enggak)
+// rootProject.name = "android"
 
-include(":app")
-include(":capacitor-cordova-android-plugins")
-project(":capacitor-cordova-android-plugins").projectDir = new File("./capacitor-cordova-android-plugins/")
-
-apply from: "capacitor.settings.gradle"
+include ':app'
+apply from: 'capacitor.settings.gradle' // ini akan include :capacitor-android & :capacitor-cordova-android-plugins
