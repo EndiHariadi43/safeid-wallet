@@ -2,7 +2,8 @@ name: Sponsors (Realtime)
 
 on:
   repository_dispatch:
-    types: [sponsors_event]   # dipicu oleh Cloudflare Worker
+    types: [sponsors_event] # dipicu oleh Cloudflare Worker
+  workflow_dispatch: {}
 
 permissions:
   contents: write             # agar bisa commit perubahan file
