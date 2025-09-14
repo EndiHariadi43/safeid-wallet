@@ -15,6 +15,12 @@ env:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    # Pemetaan secrets -> env (opsional tapi rapi)
+    env:
+      KEYSTORE_BASE64:   ${{ secrets.KEYSTORE_BASE64 }}
+      KEY_ALIAS:         ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD:      ${{ secrets.KEY_PASSWORD }}
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -25,14 +31,14 @@ jobs:
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup Node (with pnpm cache)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
           cache-dependency-path: webwallet/pnpm-lock.yaml
 
-      - name: Cleanup workspace files (avoid pnpm workspace confusion)
+      - name: Cleanup workspace files
         run: |
           rm -f pnpm-workspace.yaml || true
           rm -f webwallet/pnpm-workspace.yaml || true
@@ -49,7 +55,6 @@ jobs:
         working-directory: webwallet
         run: pnpm cap sync android
 
-      # Toolchain: cocok dengan konfigurasi project (Java/Kotlin target 17)
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
@@ -59,61 +64,53 @@ jobs:
       - name: Setup Gradle cache
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Ensure gradlew is executable
+      - name: Make gradlew executable
         working-directory: webwallet/android
         run: chmod +x gradlew
 
-      - name: Normalize gradlew line endings (just in case)
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y dos2unix
-          dos2unix webwallet/android/gradlew
-
-      # ---------- RELEASE SIGNING (opsional) ----------
-      - name: Check keystore secret
+      # ==== Signing (Release) ====
+      - name: Check keystore secret present
         id: has_keystore
         run: |
-          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+          if [ -n "${KEYSTORE_BASE64:-}" ]; then
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "present=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Decode keystore → android/app/keystore.jks
+      - name: Decode keystore
         if: steps.has_keystore.outputs.present == 'true'
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
           set -euo pipefail
           mkdir -p webwallet/android/app
-          # Bersihkan header/footer dan CRLF/spasi → hindari "base64: invalid input"
-          printf '%s' "${KEYSTORE_BASE64}" \
-            | sed -E 's/-----BEGIN[^-]*-----//g; s/-----END[^-]*-----//g' \
-            | tr -d '\r\n ' \
-            | base64 -d -i > webwallet/android/app/keystore.jks
+          # bersihkan CRLF/spasi lalu decode
+          printf '%s' "${KEYSTORE_BASE64}" | tr -d '\r\n ' | base64 -d -i > webwallet/android/app/keystore.jks
+          # verifikasi cepat
+          keytool -list -keystore webwallet/android/app/keystore.jks -storepass "${KEYSTORE_PASSWORD}" >/dev/null 2>&1
 
-          # Verifikasi storepass (tidak menampilkan detail)
-          keytool -list -keystore webwallet/android/app/keystore.jks \
-            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" >/dev/null
-
-      - name: Write gradle.properties for release signing
+      - name: Configure signing
         if: steps.has_keystore.outputs.present == 'true'
         working-directory: webwallet/android
-        env:
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
           {
-            echo "MY_KEYSTORE_FILE=app/keystore.jks"   # penting: path relatif dari /android
+            # ⬇️ path yang benar RELATIF ke module app/
+            echo "MY_KEYSTORE_FILE=keystore.jks"
             echo "MY_KEY_ALIAS=${KEY_ALIAS}"
             echo "MY_KEY_PASSWORD=${KEY_PASSWORD}"
             echo "MY_STORE_PASSWORD=${KEYSTORE_PASSWORD}"
           } >> gradle.properties
-          echo "== gradle.properties (redacted) =="
-          grep -v PASSWORD gradle.properties || true
 
-      # ---------- BUILD DEBUG ----------
+      - name: Sanity check keystore & props
+        if: steps.has_keystore.outputs.present == 'true'
+        run: |
+          set -e
+          ls -la webwallet/android/app/keystore.jks
+          echo "Gradle properties (filtered):"
+          grep -E 'MY_KEYSTORE_FILE|MY_KEY_ALIAS' webwallet/android/gradle.properties || true
+          # Tampilkan konfigurasi signing Gradle
+          (cd webwallet/android && ./gradlew :app:signingReport)
+
+      # ==== Build ====
       - name: Build APK (debug)
         working-directory: webwallet/android
         run: ./gradlew assembleDebug --warning-mode=all --stacktrace
@@ -124,7 +121,6 @@ jobs:
           name: safeid-wallet-debug-apk
           path: webwallet/android/app/build/outputs/apk/debug/app-debug.apk
 
-      # ---------- BUILD RELEASE ----------
       - name: Build APK (release)
         if: steps.has_keystore.outputs.present == 'true'
         working-directory: webwallet/android
