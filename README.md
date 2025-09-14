@@ -85,7 +85,7 @@ cd webwallet/android
 ```
 
 ### GitHub Actions (CI/CD)
-The ['Android Build workflow](.github/workflows/android.yml) builds Debug and Release APKs automatically.
+The [Android Build workflow](.github/workflows/android.yml) builds Debug and Release APKs automatically.
 
 Release builds require signing keystore secrets configured in repository settings:
 
