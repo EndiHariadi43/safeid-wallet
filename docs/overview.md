@@ -1,6 +1,9 @@
 # SafeID Wallet – Architecture
 
-Diagram ini menunjukkan alur identitas & reputasi antara **User → SafeID Wallet (dApp & Bot) → BNB Passport → Gated Features/Communities**.
+**SafeID Wallet** is a lightweight crypto wallet focused on **BNB Smart Chain**.
+It is designed for **security-first use cases**, with developer-friendly architecture based on **Capacitor**.
+
+This diagram shows the identity & reputation flow between **User → SafeID Wallet (dApp & Bot) → BNB Passport → Gated Features/Communities**.
 
 ```mermaid
 flowchart TD
@@ -121,3 +124,31 @@ flowchart LR
 | Backend/Webhook (opsional) | Relay, audit log, rate‑limit | *(nanti: `server/` jika dibutuhkan)* |
 | Gating Smart Contract | Keputusan akses on‑chain | *(nanti: `contracts/`)* |
 
+---
+
+## Core Principles
+- 🔒 **Security-First** — Never compromise user safety.
+- ⚡ **Lightweight** — Minimal dependencies, runs on web and Android.
+- 🛠 **Extensible** — Easy to integrate with plugins and external APIs.
+- 🌐 **Open Source** — Built transparently for the community.
+
+---
+
+## Architecture
+- **Web App**: Vue/React frontend with PNPM  
+- **Capacitor Bridge**: Sync between web and Android  
+- **Android Client**: Built via Gradle + Capacitor  
+
+---
+
+## Current Status
+✅ MVP available  
+⚠️ Demo only — **Do not use with real funds**  
+
+---
+
+## Links
+- [README](../README.md)  
+- [ROADMAP](../ROADMAP.md)  
+- [SECURITY](../SECURITY.md)  
+- [SPONSORS](../SPONSORS.md)  
