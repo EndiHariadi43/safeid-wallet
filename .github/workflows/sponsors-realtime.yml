@@ -2,8 +2,8 @@ name: Sponsors (Realtime)
 
 on:
   repository_dispatch:
-    types: [sponsors_event]
-  workflow_dispatch: {}  # biar bisa test manual
+    types: [sponsors_event]    # Cloudflare Worker
+  workflow_dispatch: {}        # agar bisa dijalankan manual saat tes
 
 permissions:
   contents: write
@@ -31,8 +31,9 @@ jobs:
           EVENT_PRIVACY: ${{ github.event.client_payload.privacy || 'PUBLIC' }}
         run: node .github/scripts/render-sponsors.js
 
+      # --- ONE-TIME: $10 Twitter shoutout ---
       - name: Tweet for $10 one-time
-        if: ${{ github.event.client_payload.isOneTime == true && contains(lower(github.event.client_payload.tierName), '10') || github.event.client_payload.amountCents == 1000 }}
+        if: ${{ github.event.client_payload.isOneTime && (contains(github.event.client_payload.tierName, 'Twitter Shoutout') || contains(github.event.client_payload.tierName, '10') || github.event.client_payload.amountCents == 1000) }}
         env:
           X_API_KEY: ${{ secrets.X_API_KEY }}
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
@@ -42,8 +43,9 @@ jobs:
           EVENT_PRIVACY: ${{ github.event.client_payload.privacy || 'PUBLIC' }}
         run: node .github/scripts/post-twitter.js
 
+      # --- ONE-TIME: $50 Release notes mention ---
       - name: Queue Release Notes for $50 one-time
-        if: ${{ github.event.client_payload.isOneTime == true && (contains(lower(github.event.client_payload.tierName), '50') || github.event.client_payload.amountCents == 5000) }}
+        if: ${{ github.event.client_payload.isOneTime && (contains(github.event.client_payload.tierName, 'Release Notes') || contains(github.event.client_payload.tierName, '50') || github.event.client_payload.amountCents == 5000) }}
         env:
           EVENT_SPONSOR: ${{ github.event.client_payload.sponsor }}
           EVENT_PRIVACY: ${{ github.event.client_payload.privacy || 'PUBLIC' }}
