@@ -18,7 +18,7 @@ See [ROADMAP.md](./ROADMAP.md).
 
 ---
 
-## 🔧 Build Toolchain
+## Build Toolchain
 
 - **AGP**: 8.7.2  
 - **Gradle**: 8.13  
