@@ -1,7 +1,7 @@
 # SafeID Wallet – Overview
 
 <p align="center">
-  <img src="./assets/safeid-logo.png" alt="SafeID Wallet Logo" width="160" style="border-radius:50%"/>
+  <img src="./assets/safeid-logo-circle.png" alt="SafeID Wallet Logo" width="160" style="border-radius:50%"/>
 </p>
 
 **SafeID Wallet** is a lightweight crypto wallet focused on **BNB Smart Chain**.  
