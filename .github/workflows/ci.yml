@@ -36,7 +36,7 @@ jobs:
 
       - name: Setup Node (with pnpm cache)
         if: steps.find_lock.outputs.found == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
@@ -44,7 +44,7 @@ jobs:
 
       - name: Setup Node (no cache)
         if: steps.find_lock.outputs.found != 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
 
