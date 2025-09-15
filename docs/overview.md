@@ -1,15 +1,62 @@
 # SafeID Wallet – Overview
 
-<p align="center">
-  <img src="./assets/safeid-logo-circle.png" alt="SafeID Wallet Logo" width="160" style="border-radius:50%"/>
-</p>
-
-**SafeID Wallet** is a lightweight crypto wallet focused on **BNB Smart Chain**.  
+SafeID Wallet is a lightweight crypto wallet focused on **BNB Smart Chain**.  
 It is designed for **security-first use cases**, with developer-friendly architecture based on **Capacitor**.
 
 ---
 
-## Architecture (Flow)
+## Features (MVP)
+- 🔑 Generate throwaway wallet (mnemonic) — **demo only**
+- 📱 Show address + QR
+- 💰 Check BNB balance via JSON-RPC
+- 📦 Build as Android APK (via Capacitor)
+
+---
+
+## Roadmap
+See [ROADMAP.md](./ROADMAP.md).
+
+---
+
+## Toolchain
+- **Web**: Vite + TypeScript + PNPM  
+- **Mobile**: Capacitor + Android Studio (Gradle)  
+- **Bot**: Telegram Bot (Aiogram, Python)  
+- **Optional backend**: Python/Node relay server
+
+---
+
+## Build & Run
+
+### Run locally
+```bash
+pnpm i
+pnpm dev       # runs web wallet in dev mode
+```
+
+Or run inside the `webwallet` folder:
+
+```bash
+cd webwallet
+pnpm i
+pnpm dev
+```
+
+### Build Android APK
+```bash
+pnpm -C webwallet build
+pnpm -C webwallet cap sync android
+cd webwallet/android
+./gradlew assembleDebug   # debug APK
+./gradlew assembleRelease # release APK (requires keystore)
+```
+
+Artifacts (APK) are also produced automatically by GitHub Actions:  
+check the **Actions → Android Build** workflow.
+
+---
+
+# Architecture
 
 This diagram shows the identity & reputation flow between **User → SafeID Wallet (dApp & Bot) → BNB Passport → Gated Features/Communities**.
 
@@ -73,15 +120,17 @@ sequenceDiagram
 
 ---
 
-## System Context
+## Components / System Context
 
 ```mermaid
 flowchart LR
+  %% --- Clients ---
   subgraph C1[Clients]
     U[User - Wallet + Browser]
     TGU[Telegram User]
   end
 
+  %% --- SafeID Wallet (your system) ---
   subgraph S1[SafeID Wallet]
     A[Web dApp - Vite/TS]
     W[Passport Wrapper - getReputation]
@@ -89,32 +138,39 @@ flowchart LR
     BE[(Backend/Webhook - optional)]
   end
 
+  %% --- External Services ---
   subgraph E1[External Services]
     P[(BNB Passport API)]
     O[(OAuth: Twitter / Telegram)]
   end
 
+  %% --- On-chain / Destinations ---
   subgraph O1[On-chain / Destinations]
     C[[Gating Smart Contract]]
     F[Features & Communities - Airdrop, Allowlist, Voting, Private Chat]
   end
 
+  %% Links (social + identity)
   U -->|Connect wallet| A
   A -->|Link social| O
   B -->|Link chat| O
 
+  %% Reputation fetch
   A -->|getReputation - address| P
   B -->|getReputation - address| P
   P -->|score| A
   P -->|score| B
   A --> U
 
+  %% Access decisions
   A -->|requestAccess - score, address| C
   B -->|requestAccess - score, address| C
   C -->|grant/block| F
 
+  %% Notifications / roles - off-chain
   B -->|notify / assign role| TGU
 
+  %% Optional backend fan-out
   A --> BE
   B --> BE
   BE --> C
@@ -123,36 +179,32 @@ flowchart LR
 
 ---
 
-## Components ↔ Directory Map
-
-| Component               | Role                                      | Directory             |
-|--------------------------|-------------------------------------------|-----------------------|
-| Web dApp (Vite/TS)      | UI connect wallet, show score, request access | `app/`              |
-| Passport Wrapper         | Abstraction for BNB Passport API calls    | `passport/`           |
-| Telegram Bot (Aiogram)   | `/score`, verification, role/notify       | `bot/`                |
-| Backend/Webhook (opt.)   | Relay, audit log, rate-limit              | *(future: `server/`)* |
-| Gating Smart Contract    | On-chain access decisions                 | *(future: `contracts/`)* |
+### Component ↔ Directory Map
+| Komponen | Peran | Direktori |
+|---|---|---|
+| Web dApp (Vite/TS) | UI connect wallet, tampilkan skor, kirim request akses | `app/` |
+| Passport Wrapper | Abstraksi pemanggilan BNB Passport API | `passport/` |
+| Telegram Bot (Aiogram) | Perintah `/score`, verifikasi, role/notify | `bot/` |
+| Backend/Webhook (opsional) | Relay, audit log, rate-limit | *(nanti: `server/` jika dibutuhkan)* |
+| Gating Smart Contract | Keputusan akses on‑chain | *(nanti: `contracts/`)* |
 
 ---
 
 ## Core Principles
-
-- 🔒 **Security-First** — Never compromise user safety  
-- ⚡ **Lightweight** — Minimal dependencies, runs on web and Android  
-- 🛠 **Extensible** — Easy to integrate with plugins and external APIs  
-- 🌐 **Open Source** — Built transparently for the community  
+- 🔒 **Security-First** — Never compromise user safety.
+- ⚡ **Lightweight** — Minimal dependencies, runs on web and Android.
+- 🛠 **Extensible** — Easy to integrate with plugins and external APIs.
+- 🌐 **Open Source** — Built transparently for the community.
 
 ---
 
-## Status
-
+## Current Status
 ✅ MVP available  
 ⚠️ Demo only — **Do not use with real funds**
 
 ---
 
 ## Links
-
 - [README](../README.md)  
 - [ROADMAP](../ROADMAP.md)  
 - [SECURITY](../SECURITY.md)  
