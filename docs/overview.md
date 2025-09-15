@@ -56,7 +56,12 @@ check the **Actions → Android Build** workflow.
 
 ---
 
-# Architecture
+## SafeID Wallet – Architecture
+
+**Architecture Summary**
+- **Web App**: Vue/React frontend with PNPM  
+- **Capacitor Bridge**: Sync between web and Android  
+- **Android Client**: Built via Gradle + Capacitor
 
 This diagram shows the identity & reputation flow between **User → SafeID Wallet (dApp & Bot) → BNB Passport → Gated Features/Communities**.
 
@@ -98,7 +103,7 @@ flowchart TD
 
 ---
 
-## Sequence
+## SafeID Wallet – Sequence
 
 ```mermaid
 sequenceDiagram
@@ -120,7 +125,7 @@ sequenceDiagram
 
 ---
 
-## Components / System Context
+## SafeID Wallet – Components / System Context
 
 ```mermaid
 flowchart LR
