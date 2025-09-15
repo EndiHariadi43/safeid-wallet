@@ -18,6 +18,18 @@ See [ROADMAP.md](./ROADMAP.md).
 
 ---
 
+## 🔧 Build Toolchain
+
+- **AGP**: 8.7.2  
+- **Gradle**: 8.13  
+- **JDK**: 17  
+- **compileSdk / targetSdk**: 36  
+- **minSdk**: 23  
+- **Kotlin jvmTarget**: 17  
+- **Package manager**: PNPM v9
+
+---
+
 ## Toolchain
 - **Web**: Vite + TypeScript + PNPM  
 - **Mobile**: Capacitor + Android Studio (Gradle)  
