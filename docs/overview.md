@@ -75,6 +75,20 @@ check the **Actions → Android Build** workflow.
 - **Capacitor Bridge**: Sync between web and Android  
 - **Android Client**: Built via Gradle + Capacitor
 
+SafeID Wallet is structured around **Capacitor** bridging:
+
+- **Web dApp (`webwallet/`)**:  
+  Vite/TypeScript frontend for wallet generation, reputation score, and feature gating.
+
+- **Android (`webwallet/android/`)**:  
+  Capacitor wrapper that embeds the web app and builds into APK/AAB via Gradle.
+
+- **Planned Components**:  
+  - `passport/`: thin wrapper for BNB Passport API  
+  - `bot/`: Telegram bot (Aiogram)  
+  - `server/`: optional backend/webhook  
+  - `contracts/`: on-chain gating logic
+
 This diagram shows the identity & reputation flow between **User → SafeID Wallet (dApp & Bot) → BNB Passport → Gated Features/Communities**.
 
 ```mermaid
