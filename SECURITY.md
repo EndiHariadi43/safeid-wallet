@@ -4,7 +4,7 @@
 The `main` branch is supported with security fixes.
 
 ## Reporting a Vulnerability
-Please email security reports to **security@safeidwallet.local** (replace with real).
+Please email security reports to **59972539+EndiHariadi43@users.noreply.github.com**.
 Provide:
 - Affected commit / version
 - Reproduction steps
